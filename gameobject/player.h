@@ -2,9 +2,11 @@
 
 #include	<memory>
 #include	"gameobject.h"
-#include	"../system/CStaticMesh.h"
-#include	"../system/CStaticMeshRenderer.h"
+#include	"../system/CAnimationMeshBlender.h"
+#include	"../system/CAnimationObject.h"
 #include	"../system/CShader.h"
+// 追加: アニメーションデータを管理するクラス
+#include	"../system/CAnimationData.h"
 
 class player : public gameobject {
 
@@ -15,18 +17,28 @@ public:
 	void dispose() override;
 
 	// 動きのパラメータ
-	const float VALUE_MOVE_MODEL = 2.0f;					// 移動速度
-	const float VALUE_ROTATE_MODEL = PI * 0.02f;			// 回転速度
-	const float RATE_ROTATE_MODEL = 0.40f;					// 回転慣性係数
-	const float RATE_MOVE_MODEL = 0.20f;					// 移動慣性係数
-
+	const float VALUE_MOVE_MODEL = 1.0f;
+	const float VALUE_ROTATE_MODEL = PI * 0.02f;
+	const float RATE_ROTATE_MODEL = 0.4f;
+	const float RATE_MOVE_MODEL = 0.20f;
+	float speedRate = 0.0f;
 private:
-	std::unique_ptr<CStaticMesh>			m_mesh;
-	std::unique_ptr<CStaticMeshRenderer>	m_meshrenderer;
-	std::unique_ptr<CShader>	m_shader;
+	const float TIME_TO_RUN_MS = 1000.0f;
+	const float SPEED_RATE_IDLE = 1.0f;
+	const float SPEED_RATE_RUN = 2.0f;
 
-	// 移動量
+	float m_moveTimeCount = 0.0f;
+	// アニメーションデータの管理（メッシュより先に宣言しておくと破棄順序が安全です）
+	CAnimationData m_animData;
+
+	std::unique_ptr<CAnimationMeshBlender>	m_mesh;
+	std::unique_ptr<CAnimationObject>		m_model;
+	std::unique_ptr<CShader>				m_shader;
+
 	Vector3	m_move = { 0.0f,0.0f,0.0f };
-	// 目標回転角度
 	Vector3	m_destrot = { 0.0f,0.0f,0.0f };
+	aiAnimation* m_pAnimIdle = nullptr;
+	aiAnimation* m_pAnimRun = nullptr;
+	float m_AnimBlendRate = 0.0f;
+	uint64_t m_oldTime = 0;
 };

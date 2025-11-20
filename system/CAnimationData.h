@@ -1,30 +1,31 @@
 #pragma once
-#include	<assimp\Importer.hpp>
-#include	<assimp\scene.h>
-#include	<assimp\postprocess.h>
-#include	<assimp/cimport.h>
-#include	<unordered_map>
-#include	"NonCopyable.h"
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <assimp/cimport.h>
+#include <unordered_map>
+#include <vector>
+#include <memory>
+#include <string>
+#include "NonCopyable.h"
 
-class CAnimationData : NonCopyable{
-	// このアニメーションのパス名
-	std::string m_filename;
+class CAnimationData : public NonCopyable {
+private:
+    // アニメーションデータへのポインタ辞書
+    std::unordered_map<std::string, const aiScene*> m_Animation;
 
-	// アニメーションデータ格納辞書（キーはモーション名）
-	std::unordered_map<std::string, const aiScene*> m_Animation;
+    // Importerの実体を保持するコンテナ
+    // ここに保持しておかないとaiSceneのポインタが無効になります
+    std::vector<std::unique_ptr<Assimp::Importer>> m_importers;
 
-	// importer解放される際　シーンも解放されるのでメンバ変数にしてる
-	Assimp::Importer m_importer;	// ボーン情報
 public:
-	// アニメーションデータ読み込み
-	const aiScene* LoadAnimation(const std::string filename, const std::string name);
+    // コンストラクタ・デストラクタ
+    CAnimationData() = default;
+    ~CAnimationData() = default;
 
-	// 指定した名前のアニメーションを取得する
-	aiAnimation* GetAnimation(const char* name, int idx);
+    // ロード関数
+    const aiScene* LoadAnimation(const std::string filename, const std::string name);
 
-	// アニメーションデータが格納されているａｉＳｃｅｎｅを獲得する
-	const aiScene* GetAiScene(std::string name) 
-	{ 
-		return m_Animation[name]; 
-	}
+    // 取得関数
+    aiAnimation* GetAnimation(const std::string& name, int idx);
 };

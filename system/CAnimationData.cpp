@@ -1,26 +1,48 @@
-#include	<cassert>
-#include	<iostream>
-#include	"CAnimationData.h"
+#include "CAnimationData.h"
+#include <iostream>
 
 const aiScene* CAnimationData::LoadAnimation(const std::string filename, const std::string name)
 {
-	// シーン情報を構築
-	m_Animation[name] = m_importer.ReadFile(
-		filename.c_str(),
-		aiProcess_ConvertToLeftHanded);
-	assert(m_Animation[name]);
+    // 新しいImporterを動的に確保
+    auto importer = std::make_unique<Assimp::Importer>();
 
-	if (m_Animation[name] == nullptr) {
-		std::cout << " animation load error " << filename  << " " << m_importer.GetErrorString();
-	}
+    // 読み込み設定 (左手系への変換など)
+    const aiScene* scene = importer->ReadFile(
+        filename.c_str(),
+        aiProcess_ConvertToLeftHanded | aiProcess_Triangulate | aiProcess_LimitBoneWeights | aiProcess_GenNormals
+    );
 
-	return m_Animation[name];
+    // エラーチェック
+    if (scene == nullptr) {
+        std::cout << "[Error] Animation Load Failed: " << filename << "\n"
+            << "Reason: " << importer->GetErrorString() << std::endl;
+        return nullptr;
+    }
+
+    // 辞書にシーンポインタを登録
+    m_Animation[name] = scene;
+
+    // Importerの所有権をベクターに移して、メモリが解放されないようにする
+    m_importers.push_back(std::move(importer));
+
+    return scene;
 }
 
-// 指定した名前のアニメーションデータを取得する
-aiAnimation* CAnimationData::GetAnimation(const char* name, int idx) {
+aiAnimation* CAnimationData::GetAnimation(const std::string& name, int idx) {
+    // 存在確認 (これがないとクラッシュします)
+    auto it = m_Animation.find(name);
+    if (it == m_Animation.end()) {
+        std::cout << "[Warning] Animation not found: " << name << std::endl;
+        return nullptr;
+    }
 
-	aiAnimation* animation = m_Animation[name]->mAnimations[idx];
+    const aiScene* scene = it->second;
 
-	return animation;
+    // インデックスの範囲チェック
+    if (idx < 0 || idx >= (int)scene->mNumAnimations) {
+        std::cout << "[Warning] Animation index out of bounds: " << idx << std::endl;
+        return nullptr;
+    }
+
+    return scene->mAnimations[idx];
 }
