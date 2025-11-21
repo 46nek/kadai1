@@ -65,7 +65,7 @@ void CAnimationMeshBlender::UpdateBlended(BoneCombMatrix& bonecombarray, int& Cu
     std::unordered_map<std::string, SRTQ> localposefrom;
     std::unordered_map<std::string, SRTQ> localposeto;
 
-    if (m_toblendstate.animatiodata != nullptr) {
+    if (m_fromblendstate.animatiodata != nullptr) {
         BuildLocalPoseMap(m_fromblendstate.animatiodata, CurrentFrame, localposefrom);
     }
 
