@@ -85,7 +85,6 @@ void player::update(uint64_t dt) {
 
 
     // --- キー入力による移動処理 ---
-    // ★★★ 変更：計算した speedRate を VALUE_MOVE_MODEL に掛ける ★★★
 
     if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_A)) {
         if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_W))
@@ -151,7 +150,6 @@ void player::update(uint64_t dt) {
     }
 
     // --- 回転制御 ---
-    // (変更なし)
     if (CDirectInput::GetInstance().CheckKeyBuffer(DIK_RIGHT)) {
         m_destrot.y = m_srt.rot.y - VALUE_ROTATE_MODEL;
         if (m_destrot.y < -PI) m_destrot.y += PI * 2.0f;
@@ -193,15 +191,12 @@ void player::update(uint64_t dt) {
 
     // アニメーション速度の更新
     if (m_model) {
-        // ★ここはお好みですが、足が滑らないようにアニメ速度も連動させると自然です
-        // 今回はとりあえず speedRate を掛けておきます（遅い時はアニメも遅く）
-
         float currentAnimSpeed = (1.0f - m_AnimBlendRate) * SPEED_RATE_IDLE
             + m_AnimBlendRate * SPEED_RATE_RUN;
 
-        // speedRate を掛けることで、動き出しはアニメーションもゆっくりになります
         float deltaSeconds = (float)dt / 1000.0f;
-        m_model->BlendUpdate(deltaSeconds * currentAnimSpeed * speedRate);
+
+        m_model->BlendUpdate(deltaSeconds * currentAnimSpeed);
     }
 }
 

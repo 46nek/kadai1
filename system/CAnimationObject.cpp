@@ -28,14 +28,22 @@ void CAnimationObject::Update(float dt)
 
 void CAnimationObject::BlendUpdate(float dt)
 {
+	// 1. Update関数と同様に、秒数(dt)をアニメーションフレーム単位に変換する
+	// 本来はロードしたデータから取得するのがベストですが、Updateに合わせて24.0fとします
+	float ticksPerSecond = 24.0f;
+	float duration = 100.0f; // 必要に応じてデータの長さを取得してください
+
+	// dt は呼び出し元で加工された「経過時間(秒)」なので、ここでフレーム進行量に変換
+	m_CurrentFrame += dt * ticksPerSecond;
+
+	// 2. ループ処理を追加 (これがないと一定時間後にアニメーションが止まる/おかしくなる)
+	m_CurrentFrame = fmod(m_CurrentFrame, duration);
+
 	int frame = static_cast<int>(m_CurrentFrame);
 
 	// アニメーションメッシュ更新
 	m_AnimMesh->UpdateBlended(m_BoneCombMatrix, frame);
-
-	m_CurrentFrame += dt;
 }
-
 
 void CAnimationObject::Draw()
 {
