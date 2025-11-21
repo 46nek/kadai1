@@ -17,22 +17,34 @@ public:
 
     void SetFromAnimation(
         const aiAnimation* animatiodata,
-        bool loop=true,
+        bool loop = true,
         float = 1.0f);
 
     void SetToAnimation(
         const aiAnimation* animatiodata,
-        bool loop = true, 
+        bool loop = true,
         float = 1.0f);
 
     void UpdateBlended(
-        BoneCombMatrix& outBoneComb, 
+        BoneCombMatrix& outBoneComb,
         int& CurrentFrame);
 
     void SetBlendrate(float rate) {
         m_blendrate = rate;
     }
 
+    double GetDuration() override {
+        // To側があればTo、なければFromを使う
+        if (m_toblendstate.animatiodata) return m_toblendstate.animatiodata->mDuration;
+        if (m_fromblendstate.animatiodata) return m_fromblendstate.animatiodata->mDuration;
+        return 0.0;
+    }
+
+    double GetTicksPerSecond() override {
+        if (m_toblendstate.animatiodata) return m_toblendstate.animatiodata->mTicksPerSecond;
+        if (m_fromblendstate.animatiodata) return m_fromblendstate.animatiodata->mTicksPerSecond;
+        return 0.0;
+    }
 private:
 
     // ローカルポーズのブレンド
@@ -42,10 +54,10 @@ private:
         float rate,
         std::unordered_map<std::string, SRTQ>& blendedlocalpose);
 
-	// cross fade用
-	float	m_blendrate = 1.0f;    // ブレンド割合 from * (1-m_blendarate) + to*m_blendarate
+    // cross fade用
+    float	m_blendrate = 1.0f;    // ブレンド割合 from * (1-m_blendarate) + to*m_blendarate
 
-	// ブレンドするアニメーションの設定
+    // ブレンドするアニメーションの設定
     blendanimstate    m_fromblendstate;
     blendanimstate    m_toblendstate;
 

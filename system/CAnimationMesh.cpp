@@ -2,12 +2,12 @@
 #include	"CAnimationMesh.h"
 #include	"utility.h"
 
-void CAnimationMesh::SetCurentAnimation(aiAnimation * currentanimation) {
+void CAnimationMesh::SetCurentAnimation(aiAnimation* currentanimation) {
 	m_CurrentAnimation = currentanimation;
 }
 
 // ノードツリー表示(debug用)
-static void DispNodeTree(CTreeNode<std::string>* ptree) 
+static void DispNodeTree(CTreeNode<std::string>* ptree)
 {
 	std::cout << ptree->m_nodedata << std::endl;
 
@@ -24,7 +24,7 @@ void CAnimationMesh::Draw()
 }
 
 
-void CAnimationMesh::Load(std::string filename, std::string texturedirectory) 
+void CAnimationMesh::Load(std::string filename, std::string texturedirectory)
 {
 	// メッシュ読み込み
 	CStaticMesh::Load(filename, texturedirectory);
@@ -59,7 +59,7 @@ void CAnimationMesh::Load(std::string filename, std::string texturedirectory)
 		}																				// 20240714 DX化
 
 		m_BoneDictionary[asimpbone.first] = dxbone;										// 20240714 DX化
-	}																	
+	}
 
 	// ボーン名ツリー取得
 	m_AssimpNodeNameTree = GM31::GE::myAssimp::GetBoneNameTree();
@@ -71,7 +71,7 @@ void CAnimationMesh::Load(std::string filename, std::string texturedirectory)
 
 // 階層構造を考慮したボーンコンビネーション行列を更新
 void CAnimationMesh::UpdateBoneMatrix(
-	CTreeNode<std::string>* ptree, 
+	CTreeNode<std::string>* ptree,
 	Matrix4x4 matrix)														// 20240714 DX化	
 {
 	// ノード名からボーン辞書を使ってボーン情報を取得
@@ -136,7 +136,7 @@ void CAnimationMesh::BuildLocalPoseMap(
 }
 
 // アニメーションの更新
-void CAnimationMesh::Update(BoneCombMatrix& bonecombarray,int& CurrentFrame)
+void CAnimationMesh::Update(BoneCombMatrix& bonecombarray, int& CurrentFrame)
 {
 	// アニメーションデータ取得
 	aiAnimation* animation = m_CurrentAnimation;
@@ -166,7 +166,6 @@ void CAnimationMesh::Update(BoneCombMatrix& bonecombarray,int& CurrentFrame)
 		}
 		// 辞書にないボーン（ダミー等）は無視する
 	}
-
 
 	UpdateBoneMatrix(&m_AssimpNodeNameTree, Matrix4x4::Identity);		// 20240714 DX化	
 

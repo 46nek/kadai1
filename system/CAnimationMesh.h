@@ -31,6 +31,17 @@ protected:
 		std::unordered_map<std::string, SRTQ>& localposemap);
 
 public:
+
+	virtual double GetDuration() {
+		return m_CurrentAnimation ? m_CurrentAnimation->mDuration : 0.0;
+	}
+
+	// アニメーションの秒間Tick数を取得
+	virtual double GetTicksPerSecond() {
+		// 0の場合もあるので、そのときはデフォルト(24.0など)を返す対策が必要だが
+		// ここでは生の値を返す
+		return m_CurrentAnimation ? m_CurrentAnimation->mTicksPerSecond : 0.0;
+	}
 	void SetCurentAnimation(aiAnimation* currentanimation);
 
 	void Load(std::string filename, std::string texturedirectory = "");

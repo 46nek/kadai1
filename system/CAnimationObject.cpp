@@ -1,59 +1,69 @@
 #include	"CAnimationObject.h"
+#include    <cmath> // fmodを使うために必要かも
 
 void CAnimationObject::Init()
 {
-	// ボーンコンビネーション行列初期化
-	m_BoneCombMatrix.Create();							// 20240723 
+    m_BoneCombMatrix.Create();
 }
 
 void CAnimationObject::Update(float dt)
 {
-	// 修正: 本来はアニメーションデータから取得すべき値
-	// Assimpのデフォルトや多くのアニメーションは24や30、60など
-	// 実際には m_AnimMesh->GetTicksPerSecond() のような関数を作って取得するのがベストです
-	float ticksPerSecond = 24.0f; // 仮の値（データに合わせて取得するように実装してください）
-	float duration = 100.0f;      // 仮の値（データに合わせて取得するように実装してください）
+    // 1. データから正しいTickレートを取得する
+    double tps = m_AnimMesh->GetTicksPerSecond();
+    // データに設定がない(0.0)場合は24.0などを仮定する
+    float ticksPerSecond = (tps != 0.0) ? (float)tps : 24.0f;
 
-	// 時間経過をTick単位に変換して加算
-	m_CurrentFrame += dt * ticksPerSecond;
+    // 時間経過をTick単位に変換して加算
+    m_CurrentFrame += dt * ticksPerSecond;
 
-	// ループ処理: 期間を超えたら0に戻す
-	m_CurrentFrame = fmod(m_CurrentFrame, duration);
+    // 2. データから正しい長さを取得してループさせる
+    double dur = m_AnimMesh->GetDuration();
+    float duration = (float)dur;
 
-	int frame = static_cast<int>(m_CurrentFrame);
+    // duration が有効な値ならループ処理を行う
+    if (duration > 0.0f) {
+        m_CurrentFrame = fmod(m_CurrentFrame, duration);
+    }
 
-	// アニメーションメッシュ更新
-	m_AnimMesh->Update(m_BoneCombMatrix, frame);
+    int frame = static_cast<int>(m_CurrentFrame);
+
+    // アニメーションメッシュ更新
+    m_AnimMesh->Update(m_BoneCombMatrix, frame);
 }
 
 void CAnimationObject::BlendUpdate(float dt)
 {
-	// 1. Update関数と同様に、秒数(dt)をアニメーションフレーム単位に変換する
-	// 本来はロードしたデータから取得するのがベストですが、Updateに合わせて24.0fとします
-	float ticksPerSecond = 24.0f;
-	float duration = 100.0f; // 必要に応じてデータの長さを取得してください
+    // Update関数と同様の修正を行います
 
-	// dt は呼び出し元で加工された「経過時間(秒)」なので、ここでフレーム進行量に変換
-	m_CurrentFrame += dt * ticksPerSecond;
+    // 1. Tickレート取得
+    double tps = m_AnimMesh->GetTicksPerSecond();
+    float ticksPerSecond = (tps != 0.0) ? (float)tps : 24.0f;
 
-	// 2. ループ処理を追加 (これがないと一定時間後にアニメーションが止まる/おかしくなる)
-	m_CurrentFrame = fmod(m_CurrentFrame, duration);
+    // dt は呼び出し元で加工された「経過時間(秒)」なので、ここでフレーム進行量に変換
+    m_CurrentFrame += dt * ticksPerSecond;
 
-	int frame = static_cast<int>(m_CurrentFrame);
+    // 2. ループ処理の復活
+    double dur = m_AnimMesh->GetDuration();
+    float duration = (float)dur;
 
-	// アニメーションメッシュ更新
-	m_AnimMesh->UpdateBlended(m_BoneCombMatrix, frame);
+    if (duration > 0.0f) {
+        m_CurrentFrame = fmod(m_CurrentFrame, duration);
+    }
+
+    int frame = static_cast<int>(m_CurrentFrame);
+
+    // アニメーションメッシュ更新
+    m_AnimMesh->UpdateBlended(m_BoneCombMatrix, frame);
 }
 
 void CAnimationObject::Draw()
 {
-	// ボーンコンビネーションを定数バッファへ反映させる
-	m_BoneCombMatrix.Update();
+    // ボーンコンビネーションを定数バッファへ反映させる
+    m_BoneCombMatrix.Update();
 
-	// 定数バッファGPUへセット
-	m_BoneCombMatrix.SetGPU();
+    // 定数バッファGPUへセット
+    m_BoneCombMatrix.SetGPU();
 
-	// メッシュ描画
-	m_AnimMesh->Draw();
+    // メッシュ描画
+    m_AnimMesh->Draw();
 }
-

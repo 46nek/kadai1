@@ -3,23 +3,23 @@
 #include    "transform.h"
 
 void CAnimationMeshBlender::SetFromAnimation(
-	const aiAnimation* animatiodata,
-	bool loop, 
-	float speed) 
+    const aiAnimation* animatiodata,
+    bool loop,
+    float speed)
 {
-	m_fromblendstate.animatiodata = animatiodata;
-	m_fromblendstate.loop = loop;
-	m_fromblendstate.speed = speed;
+    m_fromblendstate.animatiodata = animatiodata;
+    m_fromblendstate.loop = loop;
+    m_fromblendstate.speed = speed;
 }
 
 void CAnimationMeshBlender::SetToAnimation(
-	const aiAnimation* animatiodata,
-	bool loop, 
-	float speed) 
+    const aiAnimation* animatiodata,
+    bool loop,
+    float speed)
 {
-	m_toblendstate.animatiodata = animatiodata;
-	m_toblendstate.loop = loop;
-	m_toblendstate.speed = speed;
+    m_toblendstate.animatiodata = animatiodata;
+    m_toblendstate.loop = loop;
+    m_toblendstate.speed = speed;
 }
 
 // ローカルポーズのブレンド
@@ -40,7 +40,7 @@ void CAnimationMeshBlender::BlendLocalPose(
         SRTQ blended{};
         blended.pos = Vector3::Lerp(fromSrtq.pos, toSrtq.pos, rate);
         blended.scale = Vector3::Lerp(fromSrtq.scale, toSrtq.scale, rate);
-        blended.quat = Quaternion::Slerp(fromSrtq.quat, toSrtq.quat, rate); 
+        blended.quat = Quaternion::Slerp(fromSrtq.quat, toSrtq.quat, rate);
 
         blendedlocalpose.emplace(bone, blended);
     }
