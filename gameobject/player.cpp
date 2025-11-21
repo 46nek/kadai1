@@ -65,17 +65,18 @@ void player::update(uint64_t dt) {
         isMoving = true;
     }
 
+    const float ACCEL_TIME = 300.0f;
+
     if (isMoving) {
         // 移動中なら時間を進める
         m_moveTimeCount += (float)dt;
 
-        // ★変更: わかりやすく「2秒（2000ms）」かけて加速させる
-        if (m_moveTimeCount >= 2000.0f) {
+        if (m_moveTimeCount >= ACCEL_TIME) {
             speedRate = 1.0f;
         }
         else {
             // 0.0(停止) から 1.0(最大) へ徐々に増やす
-            speedRate = m_moveTimeCount / 2000.0f;
+            speedRate = m_moveTimeCount / ACCEL_TIME;
         }
     }
     else {
