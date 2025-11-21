@@ -148,21 +148,23 @@ void CAnimationMesh::Update(BoneCombMatrix& bonecombarray,int& CurrentFrame)
 		CurrentFrame,
 		localpose);
 
-	// localpose の中身を 1 件ずつ取り出す
 	for (auto& pair : localpose) {
-		// map の「キー（ボーン名）」と「値（SRTQデータ）」を明示的に取り出す
-		const std::string& bonename = pair.first;   // ボーンの名前
-		SRTQ& srtq = pair.second;                   // 位置・回転・スケールの情報
+		const std::string& bonename = pair.first;
+		SRTQ& srtq = pair.second;
 
-		// ノード名からボーン辞書を使ってassimpのボーン情報を取得
-		BONE* bone = &m_BoneDictionary[bonename];
+		// 【修正】辞書にあるか確認する（[]アクセスは禁止）
+		auto it = m_BoneDictionary.find(bonename);
+		if (it != m_BoneDictionary.end()) {
+			BONE* bone = &it->second; // ポインタ取得
 
-		Matrix4x4 scalemtx = Matrix4x4::CreateScale(srtq.scale);
-		Matrix4x4 rotmtx = Matrix4x4::CreateFromQuaternion(srtq.quat);
-		Matrix4x4 transmtx = Matrix4x4::CreateTranslation(srtq.pos);
+			Matrix4x4 scalemtx = Matrix4x4::CreateScale(srtq.scale);
+			Matrix4x4 rotmtx = Matrix4x4::CreateFromQuaternion(srtq.quat);
+			Matrix4x4 transmtx = Matrix4x4::CreateTranslation(srtq.pos);
 
-		// ローカル座標からボーンのアニメーション行列を作成
-		bone->AnimationMatrix = scalemtx * rotmtx * transmtx;
+			// ローカル座標からボーンのアニメーション行列を作成
+			bone->AnimationMatrix = scalemtx * rotmtx * transmtx;
+		}
+		// 辞書にないボーン（ダミー等）は無視する
 	}
 
 
